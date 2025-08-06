@@ -1,0 +1,142 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../../utils/auth';
+
+export const LoginPage = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setError('');
+  };
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await auth.login(formData.email, formData.password);
+
+      if (result.success) {
+        navigate('/admin/dashboard');
+      } else {
+        setError(result.error || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      setError('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-50">
+      <div className="w-full max-w-md">
+        {/* Logos */}
+        <div className="flex justify-between items-center mb-8">
+          {/* MCAN Logo on the left */}
+          <img
+            src="/mcan-logo.png"
+            alt="MCAN Logo"
+            className="h-20 w-auto"
+          />
+          {/* NYSC Logo on the right */}
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/8/87/NYSC_LOGO.svg"
+            alt="NYSC Logo"
+            className="h-20 w-auto"
+          />
+        </div>
+
+        <form 
+          onSubmit={handleSubmit}
+          className="bg-white shadow-2xl rounded-xl px-8 pt-8 pb-8 mb-4 transform transition-all duration-300 hover:scale-[1.01]"
+        >
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">MCAN Lodge Portal</h1>
+            <p className="text-gray-600">Sign in to access your account</p>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
+                Email
+              </label>
+              <input
+                className="appearance-none border-2 border-gray-200 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-green-500 transition-colors"
+                id="email"
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
+                Password
+              </label>
+              <input
+                className="appearance-none border-2 border-gray-200 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-green-500 transition-colors"
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline hover:from-green-700 hover:to-green-800 transition-all duration-300 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Muslim Corpers' Association of Nigeria - FCT Chapter
+            </p>
+            <p className="text-xs text-gray-500">
+              Admin Portal - Authorized Access Only
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
